@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI活用 課題診断 | NIIGATA AI Digital Playground</title>
+<style>
+:root{
+  --ink:#1B2A4A;      /* 紺：本文 */
+  --ink-2:#4A5A78;    /* 補足文 */
+  --sky:#5B9BE0;      /* 空色：進行・グラフ */
+  --sky-pale:#E3EEFA;
+  --pink:#E5397F;     /* 桃：行動ボタン・主区分 */
+  --pink-pale:#FCE6EF;
+  --snow:#F5F8FC;     /* 背景 */
+  --line:#D3DEEC;
+  --white:#FFFFFF;
+  --radius-l:20px; --radius-s:10px;
+  --font:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Meiryo","Yu Gothic UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--ink);background:var(--snow);line-height:1.75;font-size:17px;
+  -webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:6px}
+
+/* ヘッダー */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--white)}
+.bar .site{font-size:13px;color:var(--ink-2);letter-spacing:.02em}
+.bar .site strong{display:block;color:var(--ink);font-size:16px;letter-spacing:.04em}
+.bar-acts{display:flex;align-items:center;gap:20px}
+.bar-acts [hidden]{display:none}
+.bar .home{border:0;background:none;color:var(--ink-2);font-size:14px;cursor:pointer;padding:8px 4px;text-decoration:underline;text-underline-offset:4px}
+
+main{max-width:1080px;margin:0 auto;padding:48px 28px 80px}
+.screen[hidden]{display:none}
+
+/* ボタン */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;border-radius:999px;
+  font-size:17px;font-weight:700;border:2px solid transparent;cursor:pointer;text-decoration:none;line-height:1.3}
+.btn-primary{background:var(--pink);color:#fff}
+.btn-primary:hover{background:#cf2a6c}
+.btn-secondary{background:var(--white);color:var(--ink);border-color:var(--ink)}
+.btn-secondary:hover{background:var(--sky-pale)}
+.btn-small{min-height:42px;padding:0 18px;font-size:14px}
+
+/* スタート */
+.start{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;min-height:60vh}
+.start h1{word-break:keep-all;font-size:clamp(32px,4.4vw,52px);line-height:1.35;margin:0 0 24px;letter-spacing:.02em;font-weight:800}
+.start p{margin:0 0 12px;color:var(--ink-2);max-width:32em}
+.start .meta{font-size:14px;margin-top:28px;color:var(--ink-2)}
+.start .btn{margin-top:28px;min-width:260px;min-height:64px;font-size:19px}
+
+/* 質問 */
+.progress{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+.progress .count{font-size:14px;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.progress ol{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex:1}
+.progress li{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.progress li.done{background:var(--sky)}
+.progress li.now{background:var(--ink)}
+.q-kind{font-size:14px;color:var(--ink-2);margin:0 0 8px}
+.q-text{word-break:keep-all;overflow-wrap:anywhere;font-size:clamp(24px,3vw,34px);line-height:1.5;margin:0 0 32px;font-weight:800;max-width:24em}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.options.many{grid-template-columns:repeat(3,1fr)}
+.opt{display:flex;align-items:center;gap:16px;text-align:left;min-height:84px;padding:16px 20px;background:var(--white);
+  border:2px solid var(--line);border-radius:var(--radius-s);cursor:pointer;font-size:18px;line-height:1.5}
+.options.many .opt{min-height:64px;font-size:17px}
+.opt:hover{border-color:var(--sky)}
+.opt .key{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--sky-pale);
+  font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.opt[aria-pressed="true"]{border-color:var(--ink);background:var(--sky-pale)}
+.opt[aria-pressed="true"] .key{background:var(--ink);color:#fff}
+.q-nav{margin-top:32px;display:flex;justify-content:space-between;align-items:center}
+.link-btn{border:0;background:none;color:var(--ink-2);cursor:pointer;font-size:15px;padding:8px 0;text-decoration:underline;text-underline-offset:4px}
+.hint{font-size:13px;color:var(--ink-2)}
+
+/* 結果 */
+.result-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;margin-bottom:56px}
+.result-hero .label{font-size:15px;color:var(--ink-2);margin:0 0 4px}
+.result-hero h1{word-break:keep-all;overflow-wrap:anywhere;font-size:clamp(30px,4vw,46px);line-height:1.35;margin:0 0 16px;font-weight:800;color:var(--ink)}
+.result-hero h1::before{content:"";display:block;width:56px;height:6px;border-radius:3px;background:var(--pink);margin-bottom:20px}
+.result-hero .desc{font-size:18px;margin:0 0 24px}
+.result-hero .sub{font-size:15px;color:var(--ink-2);margin:0 0 24px;padding-top:16px;border-top:1px solid var(--line)}
+.result-hero .sub b{color:var(--ink)}
+.checks{list-style:none;margin:0;padding:0}
+.checks li{position:relative;padding-left:30px;margin-bottom:8px}
+.checks li::before{content:"";position:absolute;left:4px;top:.55em;width:14px;height:8px;border-left:3px solid var(--pink);border-bottom:3px solid var(--pink);transform:rotate(-45deg)}
+.checks-title{font-weight:700;margin:0 0 10px;font-size:16px}
+
+.radar{width:100%;max-width:520px;margin:0 auto;display:block}
+.radar .grid{fill:none;stroke:var(--line);stroke-width:1}
+.radar .axis{stroke:var(--line);stroke-width:1}
+.radar .area{fill:rgba(91,155,224,.22);stroke:var(--sky);stroke-width:2.5;stroke-linejoin:round}
+.radar .dot{fill:var(--sky)}
+.radar .dot.main{fill:var(--pink);r:7}
+.radar text{font-size:16px;fill:var(--ink-2);font-family:var(--font)}
+.radar text.main{fill:var(--pink);font-weight:700}
+.radar .area{transform-box:view-box;transform-origin:335px 225px;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scale(.05);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.radar .area{animation:none}}
+
+/* 課題の整理 */
+.summary{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-l);padding:32px 40px 28px;margin-bottom:32px}
+.summary .label{font-size:15px;color:var(--ink-2);margin:0 0 2px}
+.summary h2{font-size:clamp(24px,2.6vw,30px);line-height:1.45;margin:0 0 20px;word-break:keep-all;overflow-wrap:anywhere}
+.summary dl{display:grid;grid-template-columns:14em 1fr;margin:0;border-top:1px solid var(--line)}
+.summary dt,.summary dd{margin:0;padding:14px 0;border-bottom:1px solid var(--line)}
+.summary dt{font-size:14px;color:var(--ink-2);font-weight:700;padding-right:16px}
+.summary dd{font-size:17px;line-height:1.6}
+.summary .s-note{font-size:14px;color:var(--ink-2);margin:16px 0 0}
+.summary .hp-card{border-left:6px solid var(--pink);padding:4px 0 4px 20px;margin:12px 0 24px}
+.summary .hp-card .tags{margin:0 0 10px}
+.summary .hp-card h2{margin:0 0 10px}
+.summary .hp-summary{font-size:17px;line-height:1.75;margin:0}
+.summary dd.pre{white-space:pre-line}
+.summary dd.todo{color:var(--ink-2);font-size:15px}
+.tag.cat{background:var(--ink);color:#fff}
+.q-kind.deep{display:inline-block;background:var(--pink-pale);color:#B0215A;font-weight:700;padding:4px 14px;border-radius:999px}
+.tag.match{background:var(--pink);color:#fff}
+.cta{background:var(--ink);color:#fff;border-radius:var(--radius-l);padding:40px 44px;margin-bottom:64px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.cta h2{margin:0 0 10px;font-size:24px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere}
+.cta p{margin:0;color:#C9D6EA;font-size:16px;max-width:30em}
+.cta-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:28px}
+.cta .btn-secondary{background:transparent;color:#fff;border-color:#fff}
+.cta .btn-secondary:hover{background:rgba(255,255,255,.1)}
+.cta-link{color:#C9D6EA;font-size:14px;text-underline-offset:4px}
+.kiosk .cta-link{display:none}
+.qr{margin:0;background:#fff;border-radius:var(--radius-s);padding:18px 18px 12px;text-align:center;border:4px solid var(--pink)}
+.qr-code{margin:0 auto}
+.qr-code svg{display:block}
+.qr figcaption{color:var(--ink);font-size:14px;font-weight:700;margin-top:6px}
+/* QRダイアログ（提案の詳細） */
+.qr-dialog{border:0;border-radius:var(--radius-l);padding:32px 36px 28px;width:min(560px,calc(100vw - 32px));color:var(--ink);text-align:center}
+.qr-dialog::backdrop{background:rgba(27,42,74,.62)}
+.qr-dialog .d-no{font-weight:800;color:var(--sky);font-size:16px;margin:0}
+.qr-dialog h2{font-size:20px;line-height:1.5;margin:4px 0 2px;text-wrap:balance}
+.qr-dialog .d-who{font-size:14px;color:var(--ink-2);margin:0}
+.qr-dialog .qr{display:inline-block;margin-top:14px}
+.qr-dialog .d-note{font-size:15px;margin:16px 0 20px}
+.qr-dialog .btn{min-width:200px}
+.qr-dialog[open]{display:grid;grid-template-areas:"head" "qr" "foot";justify-items:center}
+.qr-dialog .d-head{grid-area:head}
+.qr-dialog .qr{grid-area:qr}
+.qr-dialog .d-foot{grid-area:foot}
+/* 高さの低い画面（1366×768 など）では QR を左、説明と閉じるボタンを右に並べる */
+@media (max-height:860px){
+  .qr-dialog[open]{width:min(1000px,calc(100vw - 32px));grid-template-columns:auto minmax(280px,1fr);grid-template-areas:"qr head" "qr foot";
+    align-content:center;justify-items:start;text-align:left;column-gap:36px;padding:28px 36px}
+  .qr-dialog .qr{margin-top:0}
+  .qr-dialog .d-head{align-self:end}
+  .qr-dialog .d-foot{align-self:start}
+}
+
+
+/* 応募フォームに入る内容 */
+.fmap{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-l);padding:32px 40px 28px;margin-bottom:56px}
+.fmap h2{font-size:24px;margin:0 0 6px}
+.fmap .lead{margin:0 0 8px;color:var(--ink-2);font-size:15px}
+.fmap h3{font-size:15px;margin:28px 0 0;padding:6px 14px;background:var(--snow);border-radius:6px;color:var(--ink)}
+.fmap .fr{display:grid;grid-template-columns:16em 1fr 13em;grid-template-areas:"l v s";border-bottom:1px solid var(--line);padding:12px 0}
+.fmap .fl{grid-area:l;font-size:14px;font-weight:700;padding-right:16px;color:var(--ink)}
+.fmap .fl .req{color:#B0215A;font-weight:700;margin-left:4px}
+.fmap .fv{grid-area:v;font-size:16px;line-height:1.65;white-space:pre-line;overflow-wrap:anywhere}
+.fmap .fs{grid-area:s;padding-left:16px;text-align:right}
+.st{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px;line-height:1.6;text-align:left}
+.st.st-ok{background:var(--sky-pale);color:var(--ink)}
+.st.st-todo{background:var(--pink-pale);color:#B0215A}
+.st.st-drop{background:#FFF1D6;color:#7A4B00}
+.st.st-opt{background:#EEF1F5;color:var(--ink-2)}
+.fmap .s-note{font-size:14px;color:var(--ink-2);margin:16px 0 0}
+.cta .to-map{display:inline-block;margin-top:14px;color:#C9D6EA;font-size:14px;text-underline-offset:4px}
+
+/* 診断記録（スタッフ用） */
+.log-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:24px}
+.log-head h1{margin:0;font-size:30px}
+.log-head p{margin:4px 0 0;color:var(--ink-2);font-size:15px}
+.log-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:28px}
+.log-tools select{font:inherit;font-size:15px;min-height:42px;padding:0 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.log-tools .sp{flex:1}
+.btn-danger{background:#fff;color:#B0215A;border-color:#B0215A}
+.btn-danger.armed{background:#B0215A;color:#fff}
+.log-msg{font-size:14px;color:var(--ink-2);margin:-16px 0 20px;min-height:1.4em}
+.log-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:36px}
+.stat{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-s);padding:18px 20px}
+.stat h2{font-size:15px;margin:0 0 12px}
+.stat .big{font-size:40px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .big small{font-size:16px;font-weight:700;margin-left:4px}
+.bars{list-style:none;margin:0;padding:0}
+.bars li{display:grid;grid-template-columns:8.5em 1fr 2.5em;gap:8px;align-items:center;font-size:13px;margin-bottom:6px}
+.bars .bbar{display:block;height:10px;border-radius:5px;background:var(--sky-pale);overflow:hidden}
+.bars .bbar i{display:block;height:100%;background:var(--sky)}
+.bars .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.recs{border-top:1px solid var(--line)}
+.rec{border-bottom:1px solid var(--line)}
+.rec > summary{display:grid;grid-template-columns:10.5em 13em 6.5em 1fr auto;gap:16px;padding:14px 8px;cursor:pointer;list-style:none;font-size:15px;align-items:baseline}
+.rec > summary::-webkit-details-marker{display:none}
+.rec > summary:hover{background:var(--white)}
+.rec > summary .t{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.rec > summary .ttl{font-weight:700}
+.rec > summary .ttl small{display:block;font-weight:400;color:var(--ink-2);font-size:13px}
+.rec[open] > summary{background:var(--white)}
+.rec .body{background:var(--white);padding:4px 24px 24px}
+.rec .body h3{font-size:15px;margin:20px 0 8px}
+.rec .body dl{display:grid;grid-template-columns:16em 1fr;margin:0;font-size:14px}
+.rec .body dt,.rec .body dd{margin:0;padding:8px 0;border-bottom:1px solid var(--line)}
+.rec .body dt{color:var(--ink-2);font-weight:700;padding-right:12px}
+.rec .body dd{white-space:pre-line;overflow-wrap:anywhere}
+.rec .body .fmap{padding:0;border:0;margin:0}
+.rec .body .fmap h3{margin-top:16px}
+.rec .body .acts{margin-top:20px}
+.log-foot{display:flex;justify-content:flex-end;margin-top:28px}
+/* 会社情報（事務局用） */
+.staff{border:2px solid var(--pink);border-radius:var(--radius-s);padding:20px 22px 18px;margin:16px 0 8px;background:#fff}
+.rec .body .staff h3{margin:0 0 4px;font-size:16px}
+.staff .note{font-size:13px;color:var(--ink-2);margin:0 0 14px}
+.staff .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.staff .wide{grid-column:1 / -1}
+.staff label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
+.staff input:not([type=checkbox]),.staff select,.staff textarea{width:100%;font:inherit;font-size:16px;padding:8px 12px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.staff input:focus,.staff select:focus,.staff textarea:focus{outline:none;border-color:var(--sky)}
+.staff label.chk{display:flex;gap:10px;align-items:center;font-size:15px;font-weight:400;color:var(--ink);cursor:pointer;margin:0}
+.staff label.chk input{width:20px;height:20px;accent-color:var(--pink);flex:none}
+.staff .saved{font-size:13px;color:var(--ink-2);margin:10px 0 0;min-height:1.3em}
+.staff .copy-acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.staff .copy-acts .hint{flex:1;min-width:16em}
+.staff .short{display:block;margin-top:8px;font-size:14px;padding:6px 10px;background:var(--snow);border-radius:6px;overflow-wrap:anywhere;user-select:all}
+.log-setting{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.log-setting label{font-size:14px;font-weight:700}
+.log-setting input{flex:1;min-width:18em;font:inherit;font-size:15px;padding:8px 12px;border:2px solid var(--line);border-radius:8px}
+.log-setting .hint{flex-basis:100%}
+/* 短縮リンクから応募フォームへ移る画面 */
+.go-box{max-width:560px;margin:40px auto;text-align:center}
+.go-box h1{font-size:24px;margin:0 0 12px}
+.go-box p{color:var(--ink-2);margin:0 0 20px}
+.go-box .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.co small{display:block;font-weight:400;color:var(--ink-2);font-size:13px}
+.co b{font-weight:700}
+.tag.nocomp{background:#EEF1F5;color:var(--ink-2)}
+.stt{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap;background:#EEF1F5;color:var(--ink-2)}
+.stt.s1{background:var(--sky-pale);color:var(--ink)}
+.stt.s2{background:var(--pink);color:#fff}
+/* 暗証番号 */
+.pin-box{max-width:480px;margin:24px auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius-l);padding:36px 40px 28px}
+.pin-box h1{font-size:26px;margin:0 0 8px}
+.pin-box p{color:var(--ink-2);font-size:15px;margin:0 0 18px}
+.pin-box label{display:block;font-size:14px;font-weight:700;margin-bottom:4px}
+.pin-box input{width:100%;font:inherit;font-size:26px;letter-spacing:.3em;padding:8px 14px;border:2px solid var(--line);border-radius:10px;margin-bottom:14px}
+.pin-box input:focus{outline:none;border-color:var(--sky)}
+.pin-box .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.pin-err{color:#B0215A;font-size:14px;min-height:1.4em;margin:6px 0 10px}
+.pin-forgot{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.pin-forgot p{font-size:14px}
+.log-empty{padding:28px;background:var(--white);border:1px dashed var(--line);border-radius:var(--radius-s);color:var(--ink-2)}
+
+.section{margin-bottom:56px}
+.section h2{font-size:24px;margin:0 0 6px}
+.section .lead{margin:0 0 20px;color:var(--ink-2);font-size:15px}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:72px 1fr auto;gap:20px;padding:22px 0;border-bottom:1px solid var(--line);align-items:start}
+.item .no{font-weight:800;font-size:18px;color:var(--sky);font-variant-numeric:tabular-nums}
+.item h3{margin:0 0 4px;font-size:18px;line-height:1.5}
+.item .who{font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.item p{margin:0;font-size:15px;line-height:1.7}
+.item .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--sky-pale);color:var(--ink)}
+.tag.closed{background:#EEF1F5;color:var(--ink-2)}
+.tag.open{background:var(--pink-pale);color:#B0215A}
+.item .acts{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:190px}
+.empty{padding:20px 24px;background:var(--white);border:1px dashed var(--line);border-radius:var(--radius-s);color:var(--ink-2);font-size:15px}
+.more{margin-top:20px}
+.end{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid var(--line)}
+.note{font-size:13px;color:var(--ink-2)}
+
+@media (max-width:820px){
+  main{padding:28px 18px 64px}
+  .bar{padding:12px 18px}
+  .start,.result-hero{grid-template-columns:1fr;gap:24px}
+  .start .visual{order:-1;max-width:300px}
+  .options,.options.many{grid-template-columns:1fr}
+  .cta{grid-template-columns:1fr;padding:28px 22px}
+  .cta .qr{display:none}
+  .summary{padding:24px 20px}
+  .summary dl{grid-template-columns:1fr}
+  .summary dt{border-bottom:0;padding-bottom:0}
+  .summary dd{padding-top:4px}
+  .cta-link{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;border-radius:999px;background:var(--pink);color:#fff;font-weight:700;font-size:16px;text-decoration:none;order:-1}
+  .cta p{display:none}
+  .item{grid-template-columns:1fr;gap:8px}
+  .item .acts{flex-direction:row;flex-wrap:wrap;min-width:0}
+  .radar text{font-size:21px}
+  .fmap{padding:24px 20px}
+  .fmap .fr{grid-template-columns:1fr auto;grid-template-areas:"l s" "v v";row-gap:4px}
+  .fmap .fv:empty{display:none}
+  .log-stats{grid-template-columns:1fr}
+  .rec > summary{grid-template-columns:1fr 1fr;gap:4px 12px}
+  .rec .body dl{grid-template-columns:1fr}
+  .staff .grid{grid-template-columns:1fr}
+  .pin-box{padding:28px 22px}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="site"><strong>AI活用 課題診断</strong>NIIGATA AI Digital Playground</div>
+  <div class="bar-acts">
+    <button class="home" id="homeBtn" hidden>最初に戻る</button>
+    <button class="btn btn-secondary btn-small" id="logBtn">診断記録</button>
+  </div>
+</header>
+
+<main>
+  <!-- スタート -->
+  <section class="screen" id="s-start">
+    <div class="start">
+      <div>
+        <h1>自社の課題を、<br>AIで解ける形に。</h1>
+        <p>11の質問に答えると、御社の課題がどの領域に近いかを診断します。</p>
+        <p>あわせて、県内企業が掲載している同様の課題と、活用できるAI開発者の提案をご案内します。</p>
+        <button class="btn btn-primary" id="startBtn">診断をはじめる</button>
+        <p class="meta" id="startMeta">所要時間は約3分です。回答内容は、事務局の集計のためにこのPCに記録します（インターネットには送信されません）。</p>
+      </div>
+      <div class="visual" id="startVisual" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- 質問 -->
+  <section class="screen" id="s-question" hidden>
+    <div class="progress">
+      <span class="count" id="qCount"></span>
+      <ol id="qBar" aria-hidden="true"></ol>
+    </div>
+    <p class="q-kind" id="qKind"></p>
+    <h1 class="q-text" id="qText" tabindex="-1"></h1>
+    <div class="options" id="qOptions" role="group"></div>
+    <div class="q-nav">
+      <button class="link-btn" id="backBtn">前の質問へ戻る</button>
+      <span class="hint" id="qHint">キーボードの数字キーでも選択できます</span>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="screen" id="s-result" hidden>
+    <div class="result-hero">
+      <div>
+        <p class="label">診断結果</p>
+        <h1 id="rName" tabindex="-1"></h1>
+        <p class="desc" id="rDesc"></p>
+        <p class="checks-title">こんな状況はありませんか</p>
+        <ul class="checks" id="rChecks"></ul>
+        <p class="sub" id="rSub"></p>
+      </div>
+      <div id="rRadar"></div>
+    </div>
+
+    <div class="summary" id="rSummary" hidden>
+      <p class="label">御社の課題（HP掲載イメージ）</p>
+      <div class="hp-card">
+        <div class="tags"><span class="tag cat" id="sCat"></span><span class="tag" id="sGyoshu"></span></div>
+        <h2 id="sTitle"></h2>
+        <p class="hp-summary" id="sSummary"></p>
+      </div>
+      <dl id="sRows"></dl>
+      <p class="s-note" id="sNote"></p>
+    </div>
+
+    <div class="section">
+      <h2>活用できるAI開発者の提案</h2>
+      <p class="lead" id="rPropLead"></p>
+      <ul class="list" id="rProps"></ul>
+      <button class="btn btn-secondary btn-small more" id="moreBtn" hidden>ほかの提案も表示する</button>
+    </div>
+
+    <div class="cta">
+      <div class="cta-main">
+        <h2>この結果をもとに、課題として応募できます</h2>
+        <p>右のQRコードをお手持ちのスマートフォンで読み取ると、上の「HP掲載イメージ」の内容を入力した状態で課題応募フォームが開きます。会社名・ご連絡先などをご入力ください。</p>
+        <div class="cta-actions">
+          <a class="btn btn-secondary" id="ctaSoudan" target="_blank" rel="noopener">応募前に事務局へ相談する</a>
+          <a class="cta-link" id="ctaKadai" target="_blank" rel="noopener">このPCで応募フォームを開く</a>
+        </div>
+        <a class="to-map" href="#rFormMap" id="toMap">応募フォームに入る内容を確認する（ページの下へ）</a>
+      </div>
+      <figure class="qr">
+        <div class="qr-code" id="qrKadai" role="img" aria-label="課題応募フォームを開くQRコード"></div>
+        <figcaption>スマートフォンのカメラで読み取ってください</figcaption>
+      </figure>
+    </div>
+
+    <div class="section">
+      <h2>県内で掲載されている同様の課題</h2>
+      <p class="lead">同じ領域の課題を掲載している県内企業があります。</p>
+      <ul class="list" id="rIssues"></ul>
+    </div>
+
+    <div class="fmap" id="rFormMap" tabindex="-1">
+      <h2>応募フォームに入る内容</h2>
+      <p class="lead" id="fmLead"></p>
+      <div id="fmBody"></div>
+      <p class="s-note" id="fmNote"></p>
+    </div>
+
+    <div class="end">
+      <div class="row" style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-secondary" id="restartBtn">もう一度診断する</button>
+        <button class="btn btn-secondary btn-small" id="staffBtn">会社情報を登録する（事務局用）</button>
+      </div>
+      <span class="note" id="dataNote"></span>
+    </div>
+  </section>
+
+  <!-- 診断記録：右上の「診断記録」ボタンで開く（Ctrl + Shift + L、左上のタイトルの3秒長押しでも開く） -->
+  <section class="screen" id="s-log" hidden>
+    <div class="log-head">
+      <div>
+        <h1 tabindex="-1" id="logTitle">診断記録</h1>
+        <p id="logSub"></p>
+      </div>
+      <button class="btn btn-secondary btn-small" id="logClose">記録を閉じる</button>
+    </div>
+    <div class="log-tools">
+      <label for="logDay" class="hint">表示する日</label>
+      <select id="logDay"></select>
+      <label for="logFilter" class="hint">絞り込み</label>
+      <select id="logFilter">
+        <option value="">すべて</option>
+        <option value="company">会社名を登録済み</option>
+        <option value="nocompany">会社名が未登録</option>
+        <option value="consent">案内の了承あり</option>
+        <option value="st:未対応">対応状況：未対応</option>
+        <option value="st:案内済み">対応状況：案内済み</option>
+        <option value="st:エントリー済み">対応状況：エントリー済み</option>
+        <option value="st:対応不要">対応状況：対応不要</option>
+      </select>
+      <span class="sp"></span>
+      <button class="btn btn-primary btn-small" id="logCsv">CSVで書き出す</button>
+      <button class="btn btn-secondary btn-small" id="logBackup">バックアップを書き出す</button>
+      <button class="btn btn-secondary btn-small" id="logImportBtn">バックアップを読み込む</button>
+      <input type="file" id="logImport" accept=".json,application/json" hidden>
+    </div>
+    <p class="log-msg" id="logMsg" role="status"></p>
+    <div class="log-stats" id="logStats"></div>
+    <div class="recs" id="logList"></div>
+    <div class="log-setting">
+      <label for="linkBase">短縮リンクのページのURL</label>
+      <input type="url" id="linkBase" placeholder="例：https://〇〇.github.io/shindan/" autocomplete="off">
+      <button class="btn btn-secondary btn-small" id="linkBaseSave">保存</button>
+      <span class="hint" id="linkBaseNote">短縮リンク用のページを置いた場所です。設定すると、記録ごとに「応募フォームの短縮リンク」を作れます。</span>
+    </div>
+    <div class="log-foot" style="justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="hint">書き出したCSV・バックアップには会社名・連絡先が含まれます。取り扱いにご注意ください。</span>
+      <span style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-small" id="pinChange">暗証番号を変更</button>
+        <button class="btn btn-danger btn-small" id="logClear">記録をすべて削除</button>
+      </span>
+    </div>
+  </section>
+
+  <!-- 短縮リンク（#回答コード）から開いたとき：診断内容を入力した応募フォームへ移る -->
+  <section class="screen" id="s-go" hidden>
+    <div class="go-box">
+      <h1 id="goTitle" tabindex="-1">課題応募フォームを開いています…</h1>
+      <p id="goText">診断の内容を入力した状態で、課題応募フォームが開きます。</p>
+      <div class="row">
+        <a class="btn btn-primary" id="goForm">課題応募フォームを開く</a>
+        <a class="btn btn-secondary" id="goStart" href="./">診断をはじめる</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 診断記録の暗証番号 -->
+  <section class="screen" id="s-pin" hidden>
+    <form class="pin-box" id="pinForm" autocomplete="off">
+      <h1 id="pinTitle" tabindex="-1">診断記録（事務局用）</h1>
+      <p id="pinLead"></p>
+      <label for="pinInput" id="pinLabel">暗証番号</label>
+      <input type="password" id="pinInput" inputmode="numeric" maxlength="8" autocomplete="off">
+      <div id="pinRow2">
+        <label for="pinInput2">確認のため、もう一度入力</label>
+        <input type="password" id="pinInput2" inputmode="numeric" maxlength="8" autocomplete="off">
+      </div>
+      <p class="pin-err" id="pinErr" role="alert"></p>
+      <div class="row">
+        <button type="submit" class="btn btn-primary" id="pinOk">開く</button>
+        <button type="button" class="btn btn-secondary" id="pinBack">戻る</button>
+      </div>
+      <div class="pin-forgot" id="pinForgotArea">
+        <button type="button" class="link-btn" id="pinForgot">暗証番号を忘れた場合</button>
+        <div id="pinForgotBox" hidden>
+          <p>このPCの診断記録をすべて削除すると、暗証番号を設定し直せます。記録を残したい場合は、暗証番号を知っている方に確認してください。</p>
+          <button type="button" class="btn btn-danger btn-small" id="pinWipe">記録をすべて削除して設定し直す</button>
+        </div>
+      </div>
+    </form>
+  </section>
+</main>
+
+<dialog class="qr-dialog" id="qrDialog" aria-labelledby="qrDialogTitle">
+  <div class="d-head">
+    <p class="d-no" id="qrDialogNo"></p>
+    <h2 id="qrDialogTitle"></h2>
+    <p class="d-who" id="qrDialogWho"></p>
+  </div>
+  <figure class="qr">
+    <div class="qr-code big" id="qrDialogCode" role="img" aria-label="QRコード"></div>
+  </figure>
+  <div class="d-foot">
+    <p class="d-note" id="qrDialogNote"></p>
+    <button class="btn btn-secondary" id="qrDialogClose">閉じる</button>
+  </div>
+</dialog>
+
+<script src="data.js"></script>
+<script src="qrcode.js"></script>
+<script>
+(() => {
+  const D = window.SHINDAN_DATA;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  // レーダー図の軸ラベル（区分名称の短縮表記）。未定義の区分は区分名称をそのまま使う
+  const SHORT = {R1:"属人化・継承",R2:"書類・図面",R3:"検査・異常検知",R4:"予測・計画",R5:"問い合わせ",R6:"販促・営業",R7:"新商品・サービス",R8:"AI基盤"};
+  const PROPS_FIRST = 3;               // 最初に表示する提案の件数（残りは「ほかの提案も表示する」で展開）
+  // 会場モードが標準。HPなどに置いて来場者以外が使う場合は index.html?web で通常表示にする
+  // ・ブースのPC（file:// で開く）は会場モードが標準。?web で通常表示
+  // ・Webに置いた場合（http/https）は通常表示。診断記録は保存せず、事務局用のボタンも出さない（短縮リンクの転送用ページとして使う）
+  const QS = new URLSearchParams(location.search);
+  const LOCAL = location.protocol === "file:" || QS.has("staff");
+  const KIOSK = QS.has("kiosk") || (location.protocol === "file:" && !QS.has("web"));
+  const IDLE_SEC = 120;                // 会場モードで最初に戻るまでの無操作時間（秒）
+
+  // answers[i] = 共通の質問で選んだ選択肢の番号、deep[j] = 深掘り質問で選んだ選択肢の番号
+  const state = { i: 0, answers: [], deepFor: null, deep: [] };
+  const NC = D.questions.length;                                          // 共通の質問の数
+  const DEEP_N = Math.max(0, ...Object.values(D.deep || {}).map(v => v.length));
+  const deepQs = () => (D.deep && D.deep[state.deepFor]) || [];
+  const total = () => NC + (state.deepFor ? deepQs().length : DEEP_N);
+  const qAt = (i) => i < NC ? D.questions[i] : deepQs()[i - NC];
+  const ansAt = (i) => i < NC ? state.answers[i] : state.deep[i - NC];
+
+  /* ---------- 画面切り替え ---------- */
+  function show(id){
+    for (const s of document.querySelectorAll(".screen")) s.hidden = s.id !== id;
+    $("homeBtn").hidden = id === "s-start";
+    if ($("logBtn")) $("logBtn").hidden = id === "s-log" || id === "s-pin" || id === "s-go";
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- 質問 ---------- */
+  function renderQuestion(){
+    const q = qAt(state.i), n = total();
+    $("qCount").textContent = `質問 ${state.i + 1} / ${n}`;
+    $("qBar").innerHTML = Array.from({length: n}, (_, k) => `<li class="${k < state.i ? "done" : k === state.i ? "now" : ""}"></li>`).join("");
+    const isDeep = state.i >= NC;
+    $("qKind").className = "q-kind" + (isDeep ? " deep" : "");
+    $("qKind").textContent = isDeep ? `「${D.results.find(r => r.id === state.deepFor).name}」について、もう少し詳しく伺います`
+      : q.kind === "基本情報" ? "はじめに、御社について教えてください" : "";
+    $("qText").textContent = q.text;
+    const box = $("qOptions");
+    box.className = "options" + (q.options.length > 4 ? " many" : "");
+    box.setAttribute("aria-label", q.text);
+    box.innerHTML = q.options.map((o, k) =>
+      `<button class="opt" data-k="${k}" aria-pressed="${ansAt(state.i) === k}">` +
+      (q.options.length <= 9 ? `<span class="key">${k + 1}</span>` : "") + `<span>${esc(o.label)}</span></button>`).join("");
+    $("qHint").hidden = q.options.length > 9;
+    $("backBtn").hidden = state.i === 0;
+    $("qText").focus({preventScroll:true});
+  }
+  function choose(k){
+    if (state.i < NC) state.answers[state.i] = k; else state.deep[state.i - NC] = k;
+    for (const b of $("qOptions").children) b.setAttribute("aria-pressed", String(+b.dataset.k === k));
+    setTimeout(next, 220);
+  }
+  function next(){
+    if (state.i === NC - 1){
+      // 共通の質問が終わったら主区分を判定し、その区分の深掘り質問へ進む（主区分が変わったら深掘りの回答は消す）
+      const { main } = score();
+      if (state.deepFor !== main){ state.deepFor = main; state.deep = []; }
+    }
+    if (state.i < total() - 1){ state.i++; renderQuestion(); }
+    else showResult();
+  }
+  $("qOptions").addEventListener("click", e => { const b = e.target.closest(".opt"); if (b) choose(+b.dataset.k); });
+  $("backBtn").addEventListener("click", () => { if (state.i > 0){ state.i--; renderQuestion(); } });
+  document.addEventListener("keydown", e => {
+    if ($("s-question").hidden) return;
+    const k = parseInt(e.key, 10), q = qAt(state.i);
+    if (k >= 1 && k <= q.options.length && q.options.length <= 9) choose(k - 1);
+    if (e.key === "Backspace" && state.i > 0){ e.preventDefault(); state.i--; renderQuestion(); }
+  });
+
+  /* ---------- 回答コード（短縮リンク用） ---------- */
+  // 共通の質問と深掘り質問で「何番目の選択肢を選んだか」を1文字ずつ（0-9a-z）並べる。先頭2文字はデータの版
+  // （質問・選択肢・配点が変わると版が変わり、古いリンクは使えなくなる。課題・提案の更新では変わらない）
+  const DATA_SIG = (() => {
+    const src = JSON.stringify([D.questions.map(q => q.options.map(o => [o.label, o.w])),
+      Object.keys(D.deep || {}).sort().map(k => [k, D.deep[k].map(q => q.options.map(o => o.label))]), D.results.map(r => r.id)]);
+    let h = 0x811c9dc5; for (let i = 0; i < src.length; i++){ h ^= src.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return (h % 1296).toString(36).padStart(2, "0");
+  })();
+  const answerCode = () => DATA_SIG + state.answers.map(k => k.toString(36)).join("") + state.deep.map(k => k.toString(36)).join("");
+  // コードを読み取って state に入れる。読めない・版が違う場合は理由を返す
+  function loadCode(code){
+    if (!/^[0-9a-z]+$/.test(code) || code.length < 2 + NC) return "bad";
+    if (code.slice(0, 2) !== DATA_SIG) return "old";
+    const idx = [...code.slice(2)].map(c => parseInt(c, 36));
+    clearState();
+    for (let i = 0; i < NC; i++){ if (idx[i] >= D.questions[i].options.length) return "bad"; state.answers[i] = idx[i]; }
+    state.deepFor = score().main;
+    const dq = deepQs(), rest = idx.slice(NC);
+    if (rest.length !== dq.length) return "bad";
+    for (let j = 0; j < dq.length; j++){ if (rest[j] >= dq[j].options.length) return "bad"; state.deep[j] = rest[j]; }
+    return "";
+  }
+
+  /* ---------- 判定 ---------- */
+  function score(){
+    const ids = D.results.map(r => r.id), got = {}, max = {};
+    ids.forEach(id => { got[id] = 0; max[id] = 0; });
+    D.questions.forEach((q, qi) => {
+      ids.forEach(id => { max[id] += Math.max(0, ...q.options.map(o => o.w[id] || 0)); });
+      const o = q.options[state.answers[qi]];
+      if (o) for (const [id, v] of Object.entries(o.w)) got[id] += v;
+    });
+    const norm = {}; ids.forEach(id => norm[id] = max[id] ? got[id] / max[id] : 0);
+    // 同点のときは Q9 → Q3 で選んだ選択肢の区分を優先
+    const pref = (qid) => {
+      const qi = D.questions.findIndex(q => q.id === qid), o = qi >= 0 && D.questions[qi].options[state.answers[qi]];
+      return o ? Object.entries(o.w).sort((a, b) => b[1] - a[1]).map(x => x[0]) : [];
+    };
+    const tie = [...pref("Q9"), ...pref("Q3")];
+    const rank = ids.slice().sort((a, b) => (norm[b] - norm[a]) || (rankOf(tie, a) - rankOf(tie, b)));
+    return { norm, main: rank[0], sub: norm[rank[1]] > 0 ? rank[1] : null };
+  }
+  const rankOf = (arr, x) => { const i = arr.indexOf(x); return i < 0 ? 99 : i; };
+  const answerOf = (qid) => { const qi = D.questions.findIndex(q => q.id === qid); return qi >= 0 ? D.questions[qi].options[state.answers[qi]]?.label : ""; };
+
+  /* ---------- レーダー図 ---------- */
+  function radar(norm, main){
+    const R = D.results, c = 220, rad = 140, n = R.length;
+    const pt = (k, v) => { const a = -Math.PI / 2 + 2 * Math.PI * k / n; return [c + Math.cos(a) * rad * v, c + Math.sin(a) * rad * v]; };
+    const ring = (v) => R.map((_, k) => pt(k, v).join(",")).join(" ");
+    let s = `<svg class="radar" viewBox="-115 -5 670 450" role="img" aria-label="区分ごとの診断スコア">`;
+    [0.25, 0.5, 0.75, 1].forEach(v => s += `<polygon class="grid" points="${ring(v)}"/>`);
+    R.forEach((_, k) => { const [x, y] = pt(k, 1); s += `<line class="axis" x1="${c}" y1="${c}" x2="${x}" y2="${y}"/>`; });
+    if (norm){
+      s += `<polygon class="area" points="${R.map((r, k) => pt(k, Math.max(.04, norm[r.id])).join(",")).join(" ")}"/>`;
+      R.forEach((r, k) => { const [x, y] = pt(k, Math.max(.04, norm[r.id])); s += `<circle class="dot${r.id === main ? " main" : ""}" cx="${x}" cy="${y}" r="5"/>`; });
+    }
+    R.forEach((r, k) => {
+      const [x, y] = pt(k, 1.22), anchor = Math.abs(x - c) < 10 ? "middle" : x > c ? "start" : "end";
+      s += `<text x="${x}" y="${y + 4}" text-anchor="${anchor}" class="${r.id === main ? "main" : ""}">${esc(SHORT[r.id] || r.name)}</text>`;
+    });
+    return s + `</svg>`;
+  }
+
+  /* ---------- フォームURL ---------- */
+  function formUrl(base, pairs){
+    const p = new URLSearchParams([["usp", "pp_url"]]);
+    for (const [k, v] of pairs) if (v) p.append(k, v);
+    return base + "?" + p.toString();
+  }
+  // 設問文から「〜はどれですか」等を除いた短い見出しで回答を並べる
+  const shortQ = (t) => t.replace(/(はどれですか|を選択してください|に最も近いものはどれですか)$/, "");
+  function answerSummary(){
+    return "回答内容\n" + D.questions.filter(q => q.kind !== "基本情報")
+      .map(q => `・${shortQ(q.text)}：${answerOf(q.id) || "未回答"}`).join("\n");
+  }
+  // 深掘り質問の回答から「課題の整理」を作る。深掘り質問がない区分では null
+  // 型の {1}{2}{3}（整理文）と {1語}{3語}（タイトル用の語）を、深掘りの回答で置き換える
+  function fillTpl(tpl, picked){
+    if (!tpl) return "";
+    const ph = (n) => picked[n - 1]?.o.phrase || picked[n - 1]?.o.label || "";
+    const wd = (n) => picked[n - 1]?.o.word || ph(n);
+    return tpl.replace(/\{(\d)語\}/g, (_, n) => wd(+n)).replace(/\{(\d)\}/g, (_, n) => ph(+n));
+  }
+  const pubOf = (qid) => { const qi = D.questions.findIndex(q => q.id === qid); const o = qi >= 0 && D.questions[qi].options[state.answers[qi]]; return o ? (o.pub || o.label) : ""; };
+  function problemSheet(M){
+    const qs = deepQs();
+    const picked = qs.map((q, j) => ({ q, o: q.options[state.deep[j]] })).filter(x => x.o);
+    if (!picked.length) return null;
+    const title = (picked.length === qs.length && fillTpl(M.titleTpl, picked)) || picked.find(x => x.o.title)?.o.title || "";
+    const summary = picked.length === qs.length ? fillTpl(M.summaryTpl, picked) : "";
+    const rows = picked.map(x => ({ item: x.q.item, text: x.o.phrase || x.o.label }));
+    const goal = picked.find(x => x.q.item === "目指す姿")?.o.phrase || "";
+    const boost = {}; picked.forEach(x => (x.o.boost || []).forEach(id => boost[id] = (boost[id] || 0) + 1));
+    const related = {}; picked.forEach(x => (x.o.issues || []).forEach(id => related[id] = (related[id] || 0) + 1));
+    const last = picked[picked.length - 1];
+    return { title, summary, rows, goal, boost, related, cat: M.hpCat || "", lastItem: last.q.item, lastText: last.o.phrase || last.o.label,
+             message: pubOf("Q10"), tools: pubOf("Q11") };
+  }
+  const sheetText = (P, rows) => [`【課題】${P.title}`, ...rows.map(r => `【${r.item}】${r.text}`)].join("\n");
+  // Googleフォームの事前入力URLは約8,000文字が上限。超えそうな場合は長い項目を省く
+  /* ---------- QRコード ---------- */
+  // QRコードに入れるURLは短くするため、日本語はそのまま（UTF-8）にして記号だけをエンコードする
+  function compactFormUrl(base, pairs){
+    const enc = (v) => String(v).replace(/[%&#+=?\s]/g, c => encodeURIComponent(c));
+    return base + "?usp=pp_url" + pairs.filter(([, v]) => v).map(([k, v]) => `&${k}=${enc(v)}`).join("");
+  }
+  function drawQr(el, text, level = "L"){
+    qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+    const qr = qrcode(0, level); qr.addData(text, "Byte"); qr.make();
+    const n = qr.getModuleCount(), q = 4, size = n + q * 2;
+    let d = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + q} ${r + q}h1v1h-1z`;
+    // 1マスを整数ピクセルにそろえて描画する（輪郭がにじむと読み取りにくくなるため）
+    // 会場モードでは、内容が増えて目が細かくなっても1マス5px以上を保つ（カメラで読み取りやすくするため）
+    const kiosk = el.classList.contains("big") || document.body.classList.contains("kiosk");
+    const cell = Math.max(kiosk ? 5 : 2, Math.floor((kiosk ? 380 : 320) / size)), px = cell * size;
+    el.style.width = el.style.height = px + "px";
+    el.innerHTML = `<svg width="${px}" height="${px}" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges"><rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+    el.dataset.text = text; el.dataset.version = (n - 17) / 4;
+  }
+
+  const URL_LIMIT = 7000;
+  function safeFormUrl(base, pairs, longKey){
+    let u = formUrl(base, pairs);
+    if (u.length > URL_LIMIT && longKey){
+      u = formUrl(base, pairs.map(([k, v]) => k === longKey ? [k, v.split("\n\n")[0]] : [k, v]));
+    }
+    return u;
+  }
+
+  /* ---------- 結果 ---------- */
+  let shownProps = [], propLimit = PROPS_FIRST, currentSheet = null;
+  const QR_MAX_BYTES = 620;            // QRコードに入れるURLの上限（超える場合は長い項目を省く）
+  const KADAI_QR_MAX = 950;           // 課題応募フォームのQRの上限（HP掲載イメージの項目を入れるため大きめ）
+  function showResult(){
+    const { norm, main, sub } = score();
+    const M = D.results.find(r => r.id === main), S = sub && D.results.find(r => r.id === sub);
+    const gyoshu = answerOf("Q1"), jugyoin = answerOf("Q2");
+
+    $("rName").innerHTML = esc(M.name).replace(/・/g, "・<wbr>");
+    $("rDesc").textContent = M.desc;
+    $("rChecks").innerHTML = M.situations.map(t => `<li>${esc(t)}</li>`).join("");
+    $("rSub").innerHTML = S ? `あわせて「<b>${esc(S.name)}</b>」の傾向も見られます。` : "";
+    $("rSub").hidden = !S;
+    $("rRadar").innerHTML = radar(norm, main);
+
+    // 御社の課題（HP掲載イメージ）：深掘り質問の回答から、HPの課題ページと同じ項目を組み立てる
+    const P = problemSheet(M);
+    const effects = [...new Set([...M.effects, ...(S ? S.effects : [])])];
+    $("rSummary").hidden = !P;
+    if (P){
+      P.image = [`・${P.lastItem}：${P.lastText}`, `・期待する効果：${effects.join("、")}`].join("\n");
+      $("sCat").textContent = P.cat; $("sCat").hidden = !P.cat;
+      $("sGyoshu").textContent = gyoshu && gyoshu !== "その他" ? gyoshu : ""; $("sGyoshu").hidden = !(gyoshu && gyoshu !== "その他");
+      $("sTitle").textContent = P.title;
+      $("sSummary").textContent = P.summary;
+      const row = (k, v, cls = "") => `<dt>${esc(k)}</dt><dd class="${cls}">${esc(v)}</dd>`;
+      $("sRows").innerHTML =
+        row("業種", gyoshu && gyoshu !== "その他" ? gyoshu : "（応募フォームでご入力ください）", gyoshu && gyoshu !== "その他" ? "" : "todo") +
+        row("従業員数", jugyoin) +
+        row("既に導入済みのAI技術やツール", P.tools) +
+        row("具体的なイメージ", P.image, "pre") +
+        row("AI開発者へのメッセージ", P.message) +
+        row("会社所在地・事業内容", "（応募フォームでご入力ください）", "todo");
+      $("sNote").textContent = KIOSK
+        ? "この内容は、下のQRコードから開く課題応募フォームに入力されます。事務局で内容を確認・調整のうえ、HPに掲載します。"
+        : "この内容は、課題応募フォームに下書きとして入力されます。事務局で内容を確認・調整のうえ、HPに掲載します。";
+    }
+
+    // 課題応募フォーム
+    const F = D.forms.kadai;
+    const resultText = `【診断結果】${M.name}` + (S ? `（副区分：${S.name}）` : "");
+    const situation = M.situations.join("／");
+    const detail = P ? `${P.summary}\n\n${sheetText(P, P.rows)}\n${resultText}` : `${resultText}\n該当する状況：${situation}`;
+    const title = P ? P.title : M.name;
+    const base = [[F.gyoshu, gyoshu === "その他" ? "" : gyoshu], [F.jugyoin, jugyoin]];
+    $("ctaSoudan").href = safeFormUrl(F.url, [...base, [F.route, F.routeSoudan],
+      [F.image, `${detail}\n\n${answerSummary()}`],
+      [F.soudan, "診断結果をもとに、課題の整理とAIで実現できることについて相談したい"]], F.image);
+    {
+      const short = P ? `【課題】${P.title}\n${P.summary}` : resultText;
+      const sb = $("ctaSoudan");
+      sb.dataset.qrUrl = fitQr(F.url, [...base, [F.route, F.routeSoudan]],
+        [[F.image, short], [F.soudan, "診断結果をもとに、課題の整理とAIで実現できることについて相談したい"]], KADAI_QR_MAX);
+      sb.dataset.qrTitle = "応募前に事務局へ相談する";
+      sb.dataset.qrNote = "スマートフォンのカメラで読み取ると、課題応募フォーム（相談）が開きます。業種と課題の内容は入力済みです。課題の整理について、事務局に相談できます。";
+      if (KIOSK) sb.textContent = "事務局にスマホで相談する";
+    }
+    const goal = P ? P.image : answerOf("Q9");
+    const extra = [[F.goal, goal], [F.tools, P ? P.tools : pubOf("Q11")], [F.message, P ? P.message : pubOf("Q10")]];
+    const linkPairs = [...base, [F.route, F.routeKadai],
+      [F.title, title], [F.content, `${detail}\n\n${answerSummary()}`], ...effects.map(e => [F.effects, e]), ...extra];
+    $("ctaKadai").href = safeFormUrl(F.url, linkPairs, F.content);
+    // QR版：HPに載る項目（タイトル・概要・AI開発者へのメッセージ・導入済みのAI）を優先して入れ、
+    // 余裕があれば期待する効果・ありたい姿も入れる（入りきらない項目は後ろから省く）
+    const qrKeep = [...base, [F.route, F.routeKadai], [F.title, title]];
+    const qrOpt = [[F.content, P ? P.summary : resultText], [F.message, P ? P.message : pubOf("Q10")], [F.tools, P ? P.tools : pubOf("Q11")],
+       ...effects.map(e => [F.effects, e]), [F.goal, (P && P.goal) || goal]];
+    const qrPairs = fitPairs(F.url, qrKeep, qrOpt, KADAI_QR_MAX);
+    drawQr($("qrKadai"), compactFormUrl(F.url, qrPairs));
+
+    // 応募フォームに入る内容（会場モードはQRに入る内容、通常表示はリンクで入る内容）
+    const fm = formRows(F, KIOSK ? qrPairs : linkPairs, KIOSK ? [...qrKeep, ...qrOpt] : linkPairs);
+    renderFormMap($("fmBody"), fm);
+    $("fmLead").textContent = KIOSK
+      ? "上のQRコードから開く課題応募フォームには、次のように入力されます。「ご入力ください」の項目は、スマートフォンでご入力ください。"
+      : "「このPCで応募フォームを開く」から開く課題応募フォームには、次のように入力されます。「ご入力ください」の項目は、フォームでご入力ください。";
+    $("fmNote").textContent = "入力された内容は、フォーム上で自由に書き換えられます。送信するまで応募にはなりません。" +
+      "「事務局にスマホで相談する」を選んだ場合は、「課題の応募方法」が相談になり、「課題のイメージ」に課題の内容が入ります。";
+
+    // 県内の同様の課題（主区分 → 副区分の順）
+    const targets = [main, sub].filter(Boolean);
+    const fitRank = x => x.r[0] === main ? 0 : x.r.includes(main) ? 1 : x.r[0] === sub ? 2 : 3;
+    const rel = (x) => (P && P.related[x.id]) || 0;
+    const issues = D.issues.filter(x => x.r.some(r => targets.includes(r)) || rel(x))
+      .sort((a, b) => (rel(b) - rel(a)) || (fitRank(a) - fitRank(b)) || (b.open - a.open));
+    $("rIssues").innerHTML = issues.length ? issues.map(x => `
+      <li class="item">
+        <span class="no">${esc(x.id)}</span>
+        <div>
+          <h3>${esc(x.title)}</h3>
+          <p class="who">${esc(x.gyoshu)}</p>
+          <p>${esc(x.summary)}</p>
+          <div class="tags"><span class="tag ${x.open ? "open" : "closed"}">${x.open ? "提案受付中" : "受付終了"}</span><span class="tag">${esc(x.cat)}</span></div>
+        </div>
+        <div class="acts">${qrLink({ href: x.url, label: "課題の詳細を見る", kioskLabel: "課題の詳細をスマホで見る", cls: "btn btn-secondary btn-small",
+          no: x.id, title: x.title, note: "スマートフォンのカメラで読み取ると、この課題の詳細ページ（HP）が開きます。" })}</div>
+      </li>`).join("")
+      : `<li class="empty">この領域に該当する掲載課題はまだありません。最初の課題として応募することができます。</li>`;
+
+    // 提案（業種で絞り込み → 優先表示 → 主区分 → 副区分）
+    const fit = p => !gyoshu || p.gyoshu.includes(gyoshu) || p.gyoshu.includes("業種不問");
+    const pri = [...M.priority, ...(S ? S.priority : [])];
+    const boost = (p) => (P && P.boost[p.id]) || 0;
+    shownProps = D.proposals.filter(p => (p.r.some(r => targets.includes(r)) || boost(p)) && fit(p))
+      .sort((a, b) => (boost(b) - boost(a)) || (rankOf(pri, a.id) - rankOf(pri, b.id)) || (fitRank(a) - fitRank(b)));
+    shownProps.forEach(p => p._match = boost(p) > 0);
+    currentSheet = P;
+    $("rPropLead").textContent = (gyoshu && gyoshu !== "その他"
+      ? `「${gyoshu}」向け、または業種を問わない提案を表示しています。`
+      : "業種を問わない提案を中心に表示しています。") + (P ? "回答内容に近い提案から順に並べています。" : "");
+    propLimit = PROPS_FIRST; renderProps(M);
+
+    $("dataNote").textContent = `掲載データ：${D.generated} 時点`;
+
+    // 診断記録として保存する（ブースのPCのみ。短縮リンクからの転送時は保存しない）
+    if (LOCAL && !GOING) saveRecord({ code: answerCode(),
+      gyoshu, jugyoin,
+      main: { id: M.id, name: M.name }, sub: S ? { id: S.id, name: S.name } : null,
+      scores: Object.fromEntries(Object.entries(norm).map(([k, v]) => [k, Math.round(v * 100) / 100])),
+      answers: [
+        ...D.questions.map((q, qi) => ({ id: q.id, q: q.text, a: q.options[state.answers[qi]]?.label || "" })),
+        ...deepQs().map((q, j) => ({ id: q.id, item: q.item, q: q.text, a: q.options[state.deep[j]]?.label || "" })),
+      ],
+      hp: { cat: P ? P.cat : "", title, summary: P ? P.summary : "", message: P ? P.message : pubOf("Q10"),
+            tools: P ? P.tools : pubOf("Q11"), goal, effects },
+      form: fm,
+      props: shownProps.slice(0, PROPS_FIRST).map(p => `${p.id} ${p.title}`),
+      opened: [],
+    });
+
+    show("s-result");
+    $("rName").focus({preventScroll:true});
+  }
+
+  /* ---------- 応募フォームに入る内容 ---------- */
+  // フォームの全項目について、入る値と状態（入力済み／QRに入りきらない／要入力／任意）をまとめる
+  function formRows(F, pairs, candidates){
+    const cand = new Set(candidates.filter(([, v]) => v).map(([k]) => k));
+    return (F.fields || []).map(f => {
+      const entry = f.key ? F[f.key] : null;
+      const vals = entry ? pairs.filter(([k, v]) => k === entry && v).map(([, v]) => v) : [];
+      const st = vals.length ? "ok" : entry && cand.has(entry) ? "drop" : f.req ? "todo" : "opt";
+      return { sec: f.sec, label: f.label, req: f.req, value: vals.join(f.key === "effects" ? "、" : "\n"), st };
+    });
+  }
+  const ST = { ok: "診断から入力", drop: "QRに入りきらないため、フォームでご入力ください", todo: "フォームでご入力ください", opt: "任意" };
+  function renderFormMap(el, rows){
+    let html = "", sec = null;
+    for (const r of rows){
+      if (r.sec !== sec){ sec = r.sec; html += `<h3>${esc(sec)}</h3>`; }
+      html += `<div class="fr"><div class="fl">${esc(r.label)}${r.req ? `<span class="req" aria-label="必須">*</span>` : ""}</div>` +
+        `<div class="fv">${r.st === "ok" ? esc(r.value) : ""}</div>` +
+        `<div class="fs"><span class="st st-${r.st}">${ST[r.st]}</span></div></div>`;
+    }
+    el.innerHTML = html;
+  }
+  $("toMap").addEventListener("click", e => { e.preventDefault(); $("rFormMap").scrollIntoView({behavior: "smooth"}); $("rFormMap").focus({preventScroll:true}); });
+
+  /* ---------- 診断記録（このPCのブラウザに保存） ---------- */
+  const REC_KEY = "naip-shindan-records-v1";
+  let currentRecId = null;
+  const pad = (n) => String(n).padStart(2, "0");
+  const stamp = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  function loadRecs(){
+    try { const v = JSON.parse(localStorage.getItem(REC_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function storeRecs(recs){
+    try { localStorage.setItem(REC_KEY, JSON.stringify(recs)); return true; } catch (e) { return false; }
+  }
+  function saveRecord(r){
+    const rec = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), at: stamp(), data: D.generated,
+                  mode: KIOSK ? "会場" : "通常", ...r };
+    const recs = loadRecs(); recs.push(rec);
+    currentRecId = storeRecs(recs) ? rec.id : null;
+  }
+  // 結果画面でQRコードを開いたことを、その診断の記録に追記する
+  function noteOpened(what){
+    if (!currentRecId || $("s-result").hidden) return;
+    const recs = loadRecs(), rec = recs.find(x => x.id === currentRecId);
+    if (!rec) return;
+    (rec.opened = rec.opened || []).push(`${stamp().slice(11, 16)} ${what}`);
+    storeRecs(recs);
+  }
+
+  const dayOf = (r) => (r.at || "").slice(0, 10);
+  let logDay = "", logFilter = "";
+  // focusId を渡すと、その記録を開いて会社情報の入力欄にカーソルを置く（結果画面の「会社情報を登録する」から）
+  function openLog(focusId){
+    if (!LOCAL) return;
+    closeQrDialog();
+    requireUnlock(() => {
+      logDay = ""; logFilter = ""; $("logFilter").value = ""; $("logMsg").textContent = "";
+      renderLog(); show("s-log");
+      const el = typeof focusId === "string" && document.querySelector(`.rec[data-id="${CSS.escape(focusId)}"]`);
+      if (el){ el.open = true; el.scrollIntoView({block: "start"}); el.querySelector("[name=company]").focus({preventScroll:true}); }
+      else $("logTitle").focus({preventScroll:true});
+    });
+  }
+
+  /* ---------- 暗証番号（来場者が記録を見られないようにする簡易的な鍵） ---------- */
+  const PIN_KEY = "naip-shindan-pin-v1";
+  let unlocked = false, afterUnlock = null, pinMode = "enter";
+  const pinHash = (pin) => { let h = 0x811c9dc5; for (const c of "naip-shindan:" + pin){ h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); };
+  const getPin = () => { try { return localStorage.getItem(PIN_KEY); } catch (e) { return null; } };
+  function requireUnlock(next){
+    if (unlocked) return next();
+    afterUnlock = next; showPin(getPin() ? "enter" : "setup");
+  }
+  function showPin(mode){
+    pinMode = mode;
+    const setup = mode !== "enter";
+    $("pinTitle").textContent = mode === "change" ? "暗証番号を変更" : "診断記録（事務局用）";
+    $("pinLead").textContent = mode === "enter" ? "暗証番号を入力してください。"
+      : mode === "change" ? "新しい暗証番号（数字4〜8桁）を入力してください。"
+      : "診断記録には会社名や連絡先を入力できるため、来場者が見られないように暗証番号を設定します。数字4〜8桁で決めてください。";
+    $("pinLabel").textContent = setup ? "新しい暗証番号（数字4〜8桁）" : "暗証番号";
+    $("pinRow2").hidden = !setup;
+    $("pinOk").textContent = setup ? "設定して開く" : "開く";
+    $("pinForgotArea").hidden = mode !== "enter";
+    $("pinForgotBox").hidden = true;
+    $("pinInput").value = ""; $("pinInput2").value = ""; $("pinErr").textContent = "";
+    show("s-pin"); $("pinInput").focus();
+  }
+  $("pinForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = $("pinInput").value.trim();
+    if (pinMode === "enter"){
+      if (pinHash(v) !== getPin()){ $("pinErr").textContent = "暗証番号が違います。"; $("pinInput").select(); return; }
+    } else {
+      if (!/^\d{4,8}$/.test(v)){ $("pinErr").textContent = "数字4〜8桁で入力してください。"; return; }
+      if (v !== $("pinInput2").value.trim()){ $("pinErr").textContent = "確認のための入力が一致しません。"; return; }
+      try { localStorage.setItem(PIN_KEY, pinHash(v)); } catch (err){ $("pinErr").textContent = "暗証番号を保存できませんでした。"; return; }
+    }
+    unlocked = true;
+    const next = afterUnlock || (() => openLog()); afterUnlock = null;
+    if (pinMode === "change"){ renderLog(); show("s-log"); $("logMsg").textContent = "暗証番号を変更しました。"; } else next();
+  });
+  $("pinBack").addEventListener("click", () => { if (pinMode === "change"){ show("s-log"); } else reset(); });
+  $("pinForgot").addEventListener("click", () => { $("pinForgotBox").hidden = !$("pinForgotBox").hidden; });
+  $("pinWipe").addEventListener("click", e => armed(e.currentTarget, "もう一度押すと、記録をすべて削除します", () => {
+    storeRecs([]); try { localStorage.removeItem(PIN_KEY); } catch (err){}
+    showPin("setup"); $("pinErr").textContent = "記録を削除しました。新しい暗証番号を設定してください。";
+  }));
+  $("pinChange").addEventListener("click", () => showPin("change"));
+
+  /* ---------- 会社情報（事務局用） ---------- */
+  const STAFF_FIELDS = [["company", "会社・団体名", "text"], ["person", "ご担当者氏名", "text"], ["dept", "部署名/役職名", "text"],
+                        ["email", "メールアドレス", "email"], ["tel", "電話番号", "tel"]];
+  const STATUSES = ["未対応", "案内済み", "エントリー済み", "対応不要"];
+  const statusChip = (st) => `<span class="stt ${st === "案内済み" ? "s1" : st === "エントリー済み" ? "s2" : ""}">${esc(st || "未対応")}</span>`;
+  const coHtml = (r) => `${r.staff?.company ? `<b>${esc(r.staff.company)}</b>` : `<span class="tag nocomp">会社名未登録</span>`}<small>${esc(r.gyoshu || "業種未回答")}</small>`;
+  // 短縮リンク：置き場所のURL（診断記録画面で設定）＋ # ＋ 回答コード
+  const LINK_KEY = "naip-shindan-linkbase-v1";
+  const linkBase = () => { try { return localStorage.getItem(LINK_KEY) || D.linkBase || ""; } catch (e) { return D.linkBase || ""; } };
+  // 記録の回答コード（コードを持たない古い記録は、回答の文言から組み立て直す。組み立てられない場合は ""）
+  function codeOf(r){
+    if (r.code) return r.code;
+    const byId = Object.fromEntries((r.answers || []).map(a => [a.id, a.a]));
+    const com = D.questions.map(q => q.options.findIndex(o => o.label === byId[q.id]));
+    if (com.some(k => k < 0)) return "";
+    const deepFor = (() => { const keep = state.answers; state.answers = com; const m = score().main; state.answers = keep; return m; })();
+    const dq = (D.deep && D.deep[deepFor]) || [], dk = dq.map(q => q.options.findIndex(o => o.label === byId[q.id]));
+    if (dk.some(k => k < 0) || deepFor !== r.main?.id) return "";
+    return DATA_SIG + [...com, ...dk].map(k => k.toString(36)).join("");
+  }
+  function shortLink(r){
+    const base = linkBase().trim(), code = codeOf(r);
+    return base && code ? base + "#" + code : "";
+  }
+  function staffHtml(r){
+    const s = r.staff || {}, id = esc(r.id);
+    return `<div class="staff" data-sid="${id}">
+      <h3>会社情報（事務局用）</h3>
+      <p class="note">会社名・連絡先は、利用目的（今後の課題募集やイベントなどのご案内）をお伝えし、了承を得てから入力してください。入力した内容は自動で保存されます。</p>
+      <div class="grid">
+        ${STAFF_FIELDS.map(([k, label, type]) => `<div><label for="${k}_${id}">${label}</label><input type="${type}" id="${k}_${id}" name="${k}" value="${esc(s[k] || "")}" autocomplete="off"></div>`).join("")}
+        <div><label for="status_${id}">対応状況</label><select id="status_${id}" name="status">${STATUSES.map(x => `<option${x === (s.status || "未対応") ? " selected" : ""}>${x}</option>`).join("")}</select></div>
+        <div class="wide"><label class="chk"><input type="checkbox" name="consent"${s.consent ? " checked" : ""}>今後のご案内（メール等）をお送りすることについて、了承を得た</label></div>
+        <div class="wide"><label for="memo_${id}">事務局メモ</label><textarea id="memo_${id}" name="memo" rows="3">${esc(s.memo || "")}</textarea></div>
+      </div>
+      <p class="saved" data-saved>${s.updated ? `最終更新：${esc(s.updated)}` : ""}</p>
+      <div class="copy-acts">
+        <button type="button" class="btn btn-secondary btn-small" data-copy="link">応募フォームの短縮リンクをコピー</button>
+        <span class="hint">開くと、診断の内容を入力した状態で課題応募フォームが開きます（会社名・連絡先は入りません）。
+          <span class="short" data-short>${esc(shortLink(r) || (codeOf(r) ? "（短縮リンクのページのURLが未設定です。この画面の一番下で設定してください）" : "（この記録は質問の更新前のため、短縮リンクを作れません）"))}</span></span>
+      </div>
+    </div>`;
+  }
+  async function copyText(t){
+    try { await navigator.clipboard.writeText(t); return true; } catch (e) {
+      const ta = document.createElement("textarea"); ta.value = t; ta.style.cssText = "position:fixed;left:-9999px;opacity:0";
+      document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (err){} ta.remove(); return ok;
+    }
+  }
+  const staffTimers = {};
+  function onStaffInput(e){
+    const box = e.target.closest(".staff"); if (!box) return;
+    const id = box.dataset.sid;
+    clearTimeout(staffTimers[id]);
+    staffTimers[id] = setTimeout(() => {
+      const o = {};
+      box.querySelectorAll("[name]").forEach(el => o[el.name] = el.type === "checkbox" ? el.checked : el.value.trim());
+      const recs = loadRecs(), rec = recs.find(x => x.id === id); if (!rec) return;
+      rec.staff = { ...o, updated: stamp() };
+      if (!storeRecs(recs)){ box.querySelector("[data-saved]").textContent = "保存できませんでした。"; return; }
+      box.querySelector("[data-saved]").textContent = `保存しました（${rec.staff.updated.slice(11, 16)}）`;
+      const sm = box.closest(".rec").querySelector(":scope > summary");
+      sm.querySelector(".co").innerHTML = coHtml(rec); sm.querySelector(".stt").outerHTML = statusChip(rec.staff.status);
+    }, 350);
+  }
+  function bars(map, order){
+    const max = Math.max(1, ...Object.values(map));
+    const keys = (order || Object.keys(map).sort((a, b) => map[b] - map[a])).filter(k => map[k]);
+    return keys.length ? `<ul class="bars">${keys.map(k => `<li><span>${esc(k)}</span><span class="bbar"><i style="width:${(map[k] / max * 100).toFixed(1)}%"></i></span><span class="n">${map[k]}</span></li>`).join("")}</ul>` : `<p class="hint">記録がありません</p>`;
+  }
+  function renderLog(){
+    const all = loadRecs();
+    const days = [...new Set(all.map(dayOf))].sort().reverse();
+    if (logDay && !days.includes(logDay)) logDay = "";
+    $("logDay").innerHTML = `<option value="">すべての日（${all.length}件）</option>` +
+      days.map(d => `<option value="${d}"${d === logDay ? " selected" : ""}>${d}（${all.filter(r => dayOf(r) === d).length}件）</option>`).join("");
+    const recs = all.filter(r => (!logDay || dayOf(r) === logDay) && passFilter(r)).slice().reverse();
+    $("logSub").textContent = all.length
+      ? `このPCに保存されている記録：${all.length}件（${days[days.length - 1]}〜${days[0]}）`
+      : "このPCに保存されている記録はまだありません。";
+    const cnt = (f) => { const m = {}; recs.forEach(r => { const k = f(r); if (k) m[k] = (m[k] || 0) + 1; }); return m; };
+    const nameOrder = D.results.map(r => r.name);
+    $("logStats").innerHTML =
+      `<div class="stat"><h2>診断件数</h2><p class="big">${recs.length}<small>件</small></p>` +
+        `<p class="hint">会社名を登録：${recs.filter(r => r.staff?.company).length}件／案内の了承あり：${recs.filter(r => r.staff?.consent).length}件<br>` +
+        `提案・課題のQRを開いた診断：${recs.filter(r => (r.opened || []).length).length}件</p></div>` +
+      `<div class="stat"><h2>診断結果の内訳</h2>${bars(cnt(r => r.main?.name), nameOrder)}</div>` +
+      `<div class="stat"><h2>業種の内訳</h2>${bars(cnt(r => r.gyoshu))}</div>`;
+    $("logList").innerHTML = recs.length ? recs.map(r => recHtml(r)).join("") : `<p class="log-empty">表示できる記録がありません。</p>`;
+    $("linkBase").value = linkBase();
+  }
+  function passFilter(r){
+    const s = r.staff || {};
+    if (!logFilter) return true;
+    if (logFilter === "company") return !!s.company;
+    if (logFilter === "nocompany") return !s.company;
+    if (logFilter === "consent") return !!s.consent;
+    if (logFilter.startsWith("st:")) return (s.status || "未対応") === logFilter.slice(3);
+    return true;
+  }
+  function recHtml(r){
+    const dl = (rows) => `<dl>${rows.filter(([, v]) => v).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
+    const tmp = document.createElement("div"); renderFormMap(tmp, r.form || []);
+    return `<details class="rec" data-id="${esc(r.id)}">
+      <summary><span class="t">${esc(r.at)}</span><span class="co">${coHtml(r)}</span><span>${esc(r.jugyoin || "")}</span>
+        <span class="ttl">${esc(r.hp?.title || r.main?.name || "")}<small>${esc(r.main?.name || "")}${r.sub ? `（副：${esc(r.sub.name)}）` : ""}</small></span>${statusChip(r.staff?.status)}</summary>
+      <div class="body">
+        ${staffHtml(r)}
+        <h3>回答内容</h3>${dl((r.answers || []).map(a => [a.item ? `深掘り：${a.item}` : `${a.id} ${shortQ(a.q)}`, a.a || "未回答"]))}
+        <h3>診断結果</h3>${dl([["診断結果", r.main?.name], ["副区分", r.sub?.name], ["HP掲載カテゴリ", r.hp?.cat], ["課題タイトル", r.hp?.title],
+            ["概要", r.hp?.summary], ["表示した提案（上位）", (r.props || []).join("\n")], ["開いたQRコード・リンク", (r.opened || []).join("\n") || "なし"],
+            ["記録ID・掲載データ", `${r.id}（掲載データ：${r.data || "不明"}／${r.mode || ""}モード）`]])}
+        <h3>応募フォームに入る内容</h3><div class="fmap">${tmp.innerHTML}</div>
+        <div class="acts"><button class="btn btn-danger btn-small" data-del="${esc(r.id)}">この記録を削除</button></div>
+      </div>
+    </details>`;
+  }
+  // 削除ボタンは2回押しで実行する（誤操作防止）
+  function armed(btn, label, fn){
+    if (btn.classList.contains("armed")){ clearTimeout(btn._t); fn(); return; }
+    const orig = btn.textContent; btn.classList.add("armed"); btn.textContent = label;
+    btn._t = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = orig; }, 4000);
+  }
+  function download(name, text, type){
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    $("logMsg").textContent = `「${name}」を書き出しました（通常は「ダウンロード」フォルダに保存されます）。`;
+  }
+  const fileStamp = () => stamp().replace(/[-: ]/g, "").replace(/^(\d{8})(\d{4}).*/, "$1_$2");
+  function toCsv(recs){
+    const cq = D.questions.filter(q => !["Q1", "Q2"].includes(q.id));
+    const head = ["記録ID", "日時", "会社・団体名", "ご担当者氏名", "部署名/役職名", "メールアドレス", "電話番号", "案内の了承", "対応状況", "事務局メモ", "会社情報の更新日時",
+      "業種", "従業員数", "診断結果", "副区分",
+      ...cq.map(q => `${q.id} ${shortQ(q.text)}`), "深掘り1", "深掘り2", "深掘り3",
+      "HP掲載カテゴリ", "課題タイトル", "概要", "AI開発者へのメッセージ", "既に導入済みのAI技術やツール", "期待する効果",
+      "課題解決のありたい姿/AIで実現したいこと", "表示した提案（上位）", "開いたQRコード・リンク", "掲載データ", "モード",
+      ...D.results.map(r => `スコア：${SHORT[r.id] || r.name}`), "応募フォームの短縮リンク"];
+    const rows = recs.map(r => {
+      const a = Object.fromEntries((r.answers || []).filter(x => !x.item).map(x => [x.id, x.a]));
+      const deep = (r.answers || []).filter(x => x.item).map(x => `${x.item}：${x.a}`);
+      const s = r.staff || {};
+      return [r.id, r.at, s.company, s.person, s.dept, s.email, s.tel, s.consent ? "了承あり" : "", s.status || "未対応", s.memo, s.updated,
+        r.gyoshu, r.jugyoin, r.main?.name, r.sub?.name, ...cq.map(q => a[q.id]), deep[0], deep[1], deep[2],
+        r.hp?.cat, r.hp?.title, r.hp?.summary, r.hp?.message, r.hp?.tools, (r.hp?.effects || []).join("、"), r.hp?.goal,
+        (r.props || []).join("\n"), (r.opened || []).join("\n"), r.data, r.mode, ...D.results.map(x => r.scores?.[x.id] ?? ""),
+        shortLink(r)];
+    });
+    const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    return "﻿" + [head, ...rows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+  }
+  $("logDay").addEventListener("change", e => { logDay = e.target.value; renderLog(); });
+  $("logFilter").addEventListener("change", e => { logFilter = e.target.value; renderLog(); });
+  $("linkBaseSave").addEventListener("click", () => {
+    let v = $("linkBase").value.trim();
+    if (v && !/^https?:\/\/[^\s#]+$/.test(v)){ $("linkBaseNote").textContent = "http:// または https:// から始まるURLを入力してください（# は含めません）。"; return; }
+    try { v ? localStorage.setItem(LINK_KEY, v) : localStorage.removeItem(LINK_KEY); } catch (e){}
+    renderLog(); $("logMsg").textContent = v ? "短縮リンクのページのURLを保存しました。" : "短縮リンクのページのURLを消しました。";
+  });
+  $("logList").addEventListener("input", onStaffInput);
+  $("logList").addEventListener("change", onStaffInput);
+  $("logList").addEventListener("click", async e => {
+    const b = e.target.closest("[data-copy]"); if (!b) return;
+    const box = b.closest(".staff"), rec = loadRecs().find(x => x.id === box.dataset.sid); if (!rec) return;
+    const link = shortLink(rec);
+    if (!link){ box.querySelector("[data-saved]").textContent = codeOf(rec) ? "短縮リンクのページのURLが未設定です。この画面の一番下で設定してください。" : "この記録は質問の更新前のため、短縮リンクを作れません。"; return; }
+    const ok = await copyText(link);
+    box.querySelector("[data-saved]").textContent = ok ? `短縮リンクをコピーしました：${link}` : "コピーできませんでした。リンクを選択してコピーしてください。";
+  });
+  $("logClose").addEventListener("click", () => reset());
+  $("logCsv").addEventListener("click", () => {
+    const recs = loadRecs().filter(r => (!logDay || dayOf(r) === logDay) && passFilter(r));
+    if (!recs.length){ $("logMsg").textContent = "書き出す記録がありません。"; return; }
+    download(`shindan_kiroku_${logDay ? logDay.replace(/-/g, "") : "all"}${logFilter ? "_filtered" : ""}_${fileStamp()}.csv`, toCsv(recs), "text/csv;charset=utf-8");
+  });
+  $("logBackup").addEventListener("click", () => {
+    download(`shindan_backup_${fileStamp()}.json`, JSON.stringify({ kind: REC_KEY, exported: stamp(), records: loadRecs() }, null, 1), "application/json");
+  });
+  $("logImportBtn").addEventListener("click", () => $("logImport").click());
+  $("logImport").addEventListener("change", async e => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    try {
+      const j = JSON.parse(await f.text()), add = Array.isArray(j) ? j : j.records;
+      if (!Array.isArray(add)) throw 0;
+      const recs = loadRecs(), have = new Map(recs.map(r => [r.id, r]));
+      const fresh = add.filter(r => r && r.id && r.at && !have.has(r.id));
+      // 同じ記録が両方にある場合は、会社情報の新しいほうを残す
+      let upd = 0;
+      add.forEach(r => { const cur = r && have.get(r.id); if (cur && r.staff && (r.staff.updated || "") > (cur.staff?.updated || "")){ cur.staff = r.staff; upd++; } });
+      recs.push(...fresh); recs.sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0);
+      if (!storeRecs(recs)) throw 1;
+      renderLog(); $("logMsg").textContent = `${fresh.length}件の記録を読み込みました` + (upd ? `（${upd}件は会社情報を新しい内容に更新しました）` : "") + "。";
+    } catch (err){ $("logMsg").textContent = "読み込めませんでした。この画面で書き出したバックアップ（.json）を選んでください。"; }
+  });
+  $("logClear").addEventListener("click", e => armed(e.currentTarget, "もう一度押すと全件削除します", () => {
+    const n = loadRecs().length; storeRecs([]); renderLog(); $("logMsg").textContent = `${n}件の記録を削除しました。`;
+  }));
+  $("logList").addEventListener("click", e => {
+    const b = e.target.closest("[data-del]"); if (!b) return;
+    armed(b, "もう一度押すと削除します", () => {
+      storeRecs(loadRecs().filter(r => r.id !== b.dataset.del)); renderLog(); $("logMsg").textContent = "記録を1件削除しました。";
+    });
+  });
+  // 記録画面の開き方：右上の「診断記録」ボタン（ほかに Ctrl + Shift + L、画面左上のタイトルを3秒長押し）
+  $("logBtn").addEventListener("click", () => openLog());
+  $("staffBtn").addEventListener("click", () => openLog(currentRecId || undefined));
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.shiftKey && (e.key === "L" || e.key === "l")){ e.preventDefault(); if ($("s-pin").hidden) openLog(); }
+  });
+  {
+    const site = document.querySelector(".bar .site"); let t;
+    site.addEventListener("pointerdown", () => { clearTimeout(t); t = setTimeout(() => openLog(), 3000); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => site.addEventListener(ev, () => clearTimeout(t)));
+  }
+  function renderProps(M){
+    const MF = D.forms.mendan;
+    const list = shownProps.slice(0, propLimit);
+    $("rProps").innerHTML = list.length ? list.map(p => `
+      <li class="item">
+        <span class="no">${esc(p.id)}</span>
+        <div>
+          <h3>${esc(p.title)}</h3>
+          ${p.company ? `<p class="who">${esc(p.company)}</p>` : ""}
+          <p>${esc(p.summary)}</p>
+          <div class="tags">${p._match ? `<span class="tag match">回答内容に近い提案</span>` : ""}<span class="tag">${esc(p.cat)}</span>${p.phase && p.phase.length <= 24 ? `<span class="tag">${esc(p.phase)}</span>` : ""}</div>
+        </div>
+        <div class="acts">
+          ${qrLink({ href: formUrl(MF.url, [[MF.id, p.id], [MF.company, p.company], [MF.title, p.title],
+              [MF.reason, currentSheet ? sheetText(currentSheet, currentSheet.rows.slice(1)) : `診断結果：${M.name}\n${M.situations[0]}`]]),
+            qrUrl: fitQr(MF.url, [[MF.id, p.id], [MF.company, p.company], [MF.title, p.title]],
+              [[MF.reason, `診断結果：${currentSheet ? currentSheet.title : M.name}`]]),
+            label: "この提案について相談する", kioskLabel: "この提案についてスマホで相談する", cls: "btn btn-primary btn-small",
+            no: p.id, title: p.title, who: p.company,
+            note: "スマートフォンのカメラで読み取ると、この提案への面談希望フォームが開きます。提案の番号・企業名・タイトルは入力済みです。" })}
+          ${qrLink({ href: p.url, label: "提案の詳細を見る", kioskLabel: "提案の詳細をスマホで見る", cls: "btn btn-secondary btn-small",
+            no: p.id, title: p.title, who: p.company, note: "スマートフォンのカメラで読み取ると、この提案の詳細ページ（HP）が開きます。" })}
+        </div>
+      </li>`).join("")
+      : `<li class="empty">条件に合う提案は現在掲載されていません。事務局への相談から、適した開発者をご紹介します。</li>`;
+    $("moreBtn").hidden = shownProps.length <= propLimit;
+    $("moreBtn").textContent = `ほかの提案も表示する（残り${shownProps.length - propLimit}件）`;
+    $("moreBtn").onclick = () => { propLimit = shownProps.length; renderProps(M); };
+  }
+
+  /* ---------- 外部リンクのQR表示（会場モード） ---------- */
+  // 会場モードでは外部ページへ移動させない（全画面表示では戻れなくなるため）。
+  // 外部リンクを押すと、そのリンク先を開くQRコードを表示する。
+  function qrLink(o){
+    const label = KIOSK ? (o.kioskLabel || o.label) : o.label;
+    const data = [["qr-no", o.no], ["qr-title", o.title], ["qr-who", o.who], ["qr-note", o.note], ["qr-url", o.qrUrl]]
+      .filter(([, v]) => v).map(([k, v]) => ` data-${k}="${esc(v)}"`).join("");
+    return `<a class="${o.cls}" href="${esc(o.href)}" target="_blank" rel="noopener"${data}>${esc(label)}</a>`;
+  }
+  // 事前入力付きフォームのURLを、QRに収まる長さで作る（長すぎる項目は後ろから省く）
+  function fitPairs(base, keep, optional = [], max = QR_MAX_BYTES){
+    for (let n = optional.length; n >= 0; n--){
+      const pairs = [...keep, ...optional.slice(0, n)];
+      if (new TextEncoder().encode(compactFormUrl(base, pairs)).length <= max) return pairs;
+    }
+    return keep;
+  }
+  const fitQr = (base, keep, optional, max) => compactFormUrl(base, fitPairs(base, keep, optional, max));
+  const dlg = $("qrDialog");
+  let qrTrigger = null;
+  function openQrDialog(o){
+    $("qrDialogNo").textContent = o.no || ""; $("qrDialogNo").hidden = !o.no;
+    $("qrDialogTitle").textContent = o.title || "";
+    $("qrDialogWho").textContent = o.who || ""; $("qrDialogWho").hidden = !o.who;
+    $("qrDialogNote").textContent = o.note || "スマートフォンのカメラで読み取ると、リンク先のページが開きます。";
+    const bytes = new TextEncoder().encode(o.url).length;
+    drawQr($("qrDialogCode"), o.url, bytes <= 300 ? "M" : "L");   // 短いURLは誤り訂正を強めにする
+    if (!dlg.open) dlg.showModal();
+  }
+  function closeQrDialog(){ if (dlg.open) dlg.close(); }
+  // 結果画面で開いたQRコード・リンクを記録に残す
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (a && /^https?:/i.test(a.href)) noteOpened(`${a.dataset.qrNo ? a.dataset.qrNo + " " : ""}${a.textContent.trim()}`);
+  }, true);
+  if (KIOSK){
+    document.addEventListener("click", e => {
+      const a = e.target.closest("a[href]");
+      if (!a || !/^https?:/i.test(a.href)) return;
+      e.preventDefault(); e.stopPropagation();
+      qrTrigger = a;
+      openQrDialog({ no: a.dataset.qrNo, title: a.dataset.qrTitle || a.textContent.trim(), who: a.dataset.qrWho,
+                     note: a.dataset.qrNote, url: a.dataset.qrUrl || a.href });
+    }, true);
+    // 中クリック・新しいタブで開く操作も止める
+    document.addEventListener("auxclick", e => { if (e.target.closest("a[href]")) e.preventDefault(); }, true);
+    document.addEventListener("dragstart", e => { if (e.target.closest && e.target.closest("a[href]")) e.preventDefault(); }, true);
+    document.addEventListener("contextmenu", e => e.preventDefault());
+  }
+  $("qrDialogClose").addEventListener("click", closeQrDialog);
+  dlg.addEventListener("click", e => {   // ダイアログの外側（背景）を押しても閉じる
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closeQrDialog();
+  });
+  dlg.addEventListener("close", () => { if (qrTrigger && document.contains(qrTrigger)) qrTrigger.focus(); qrTrigger = null; });
+
+  /* ---------- 開始・リセット ---------- */
+  var GOING = false;   // 短縮リンクからの転送中（記録を保存しない）
+  function clearState(){ state.i = 0; state.answers = []; state.deepFor = null; state.deep = []; }
+  function reset(){ closeQrDialog(); clearState(); unlocked = false; afterUnlock = null; show("s-start"); }
+  $("startBtn").addEventListener("click", () => { clearState(); renderQuestion(); show("s-question"); $("qText").focus(); });
+  $("restartBtn").addEventListener("click", reset);
+  $("homeBtn").addEventListener("click", reset);
+  $("startVisual").innerHTML = radar(null, null);
+  if (!LOCAL){   // Webに置いた場合：記録・事務局用のボタンを出さない
+    $("logBtn").remove(); $("staffBtn").remove();
+    $("startMeta").textContent = "所要時間は約3分です。回答内容は保存・送信されません。";
+  }
+  if (LOCAL && QS.has("log")) openLog();
+  // 短縮リンク（…#回答コード）から開いた場合：診断結果を組み立てて、入力済みの課題応募フォームへ移る
+  {
+    const code = location.hash.slice(1).toLowerCase();
+    if (code && /^[0-9a-z]{4,}$/.test(code)){
+      const err = loadCode(code);
+      show("s-go"); $("homeBtn").hidden = true;
+      $("goForm").href = D.forms.kadai.url;
+      if (err){
+        clearState();
+        $("goTitle").textContent = "このリンクは使えなくなりました";
+        $("goText").textContent = err === "old"
+          ? "診断の質問が更新されたため、このリンクから診断の内容を入力できません。お手数ですが、下のボタンから課題応募フォームを開いてご入力いただくか、もう一度診断してください。"
+          : "リンクの一部が欠けている可能性があります。お手数ですが、下のボタンから課題応募フォームを開いてご入力いただくか、もう一度診断してください。";
+      } else {
+        GOING = true; showResult(); GOING = false;
+        const url = $("ctaKadai").href;
+        show("s-go"); $("homeBtn").hidden = true; $("goForm").href = url;
+        location.replace(url);
+      }
+    }
+  }
+
+  // 会場モード：一定時間操作がなければ最初に戻る
+  if (KIOSK) document.body.classList.add("kiosk");
+  if (KIOSK){
+    let t; const arm = () => { clearTimeout(t); t = setTimeout(() => { if ($("s-start").hidden) reset(); }, IDLE_SEC * 1000); };
+    ["pointerdown", "keydown", "scroll"].forEach(ev => addEventListener(ev, arm, {passive:true})); arm();
+  }
+})();
+</script>
+</body>
+</html>
